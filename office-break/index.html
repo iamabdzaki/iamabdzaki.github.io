@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Tiny Office Break is a cozy two-minute office minigame for slowing down between tasks."
+    />
+    <meta name="theme-color" content="#0b1020" />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230b1020'/%3E%3Cpath d='M7 10h15v11a5 5 0 0 1-5 5h-5a5 5 0 0 1-5-5V10Zm15 3h3a3 3 0 0 1 0 6h-3' fill='%23f2ad5b' stroke='%23fff0cf' stroke-width='2'/%3E%3Cpath d='M11 7c0-2 2-2 2-4m4 4c0-2 2-2 2-4' fill='none' stroke='%237ed6c3' stroke-width='2'/%3E%3C/svg%3E"
+    />
+    <title>Tiny Office Break</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="masthead">
+        <div class="brand" aria-label="Tiny Office Break">
+          <span class="brand-mark" aria-hidden="true">☕</span>
+          <div>
+            <p class="eyebrow">A TWO-MINUTE RESET</p>
+            <h1>Tiny Office Break</h1>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <div class="best-score" aria-label="Personal best score">
+            <span>BEST</span>
+            <strong id="bestScore">0</strong>
+          </div>
+          <button class="icon-button" id="soundToggle" type="button" aria-pressed="false">
+            <span id="soundIcon" aria-hidden="true">♪</span>
+            <span id="soundLabel">Sound off</span>
+          </button>
+        </div>
+      </header>
+
+      <main>
+        <section class="game-panel" aria-label="Tiny Office Break game">
+          <div class="status-bar" aria-label="Game status">
+            <div class="stat timer-stat">
+              <span class="stat-label">BREAK ENDS IN</span>
+              <strong id="timer">02:00</strong>
+            </div>
+
+            <div class="stat calm-stat">
+              <div class="stat-row">
+                <span class="stat-label">CALM</span>
+                <strong id="calmValue">35%</strong>
+              </div>
+              <div class="meter" aria-hidden="true">
+                <span id="calmMeter"></span>
+              </div>
+            </div>
+
+            <div class="stat points-stat">
+              <span class="stat-label">COZY POINTS</span>
+              <strong id="score">0</strong>
+            </div>
+
+            <button class="pause-button" id="pauseButton" type="button" disabled>
+              <span aria-hidden="true">Ⅱ</span>
+              <span id="pauseLabel">Pause</span>
+            </button>
+          </div>
+
+          <div class="scene" id="scene">
+            <img
+              class="scene-art"
+              src="assets/cozy-office.webp"
+              alt="A cozy pixel-art office at night, with a desk, coffee, plants, papers, a cat, and a rainy window."
+            />
+            <div class="scene-tint" aria-hidden="true"></div>
+            <div class="rain-shimmer" aria-hidden="true"></div>
+
+            <div class="start-screen" id="startScreen">
+              <div class="start-card">
+                <span class="start-icon" aria-hidden="true">☾</span>
+                <p class="start-kicker">Your desk can wait.</p>
+                <h2>Take a tiny break.</h2>
+                <p>
+                  Click the glowing objects, collect cozy points, and let the office be quiet
+                  for two minutes.
+                </p>
+                <button class="primary-button" id="startButton" type="button">
+                  Start my break <span aria-hidden="true">→</span>
+                </button>
+                <small>No game over. No productivity guilt.</small>
+              </div>
+            </div>
+
+            <div class="paused-screen" id="pausedScreen" hidden>
+              <div class="pause-card">
+                <span aria-hidden="true">Ⅱ</span>
+                <h2>Break paused</h2>
+                <p>Your calm is exactly where you left it.</p>
+                <button class="primary-button compact" id="resumeButton" type="button">Resume</button>
+              </div>
+            </div>
+
+            <button
+              class="hotspot hotspot-plant"
+              type="button"
+              data-action="plant"
+              aria-label="Water the office plant"
+              disabled
+            >
+              <span>Water plant</span>
+            </button>
+            <button
+              class="hotspot hotspot-coffee"
+              type="button"
+              data-action="coffee"
+              aria-label="Take a warm coffee sip"
+              disabled
+            >
+              <span>Coffee sip</span>
+            </button>
+            <button
+              class="hotspot hotspot-cat"
+              type="button"
+              data-action="cat"
+              aria-label="Pet the office cat"
+              disabled
+            >
+              <span>Pet cat</span>
+            </button>
+            <button
+              class="hotspot hotspot-papers"
+              type="button"
+              data-action="papers"
+              aria-label="Sort one page from the paper stack"
+              disabled
+            >
+              <span>Sort papers</span>
+            </button>
+            <button
+              class="hotspot hotspot-window"
+              type="button"
+              data-action="window"
+              aria-label="Watch the rain for a moment"
+              disabled
+            >
+              <span>Watch rain</span>
+            </button>
+
+            <div class="meeting-card" id="meetingCard" hidden role="dialog" aria-modal="false" aria-labelledby="meetingTitle">
+              <div class="meeting-topline">
+                <span class="calendar-icon" aria-hidden="true">17</span>
+                <span>CALENDAR INTERRUPTION</span>
+              </div>
+              <h2 id="meetingTitle">Quick sync?</h2>
+              <p id="meetingCopy">Someone scheduled 45 minutes to ask one question.</p>
+              <div class="meeting-actions">
+                <button id="emailButton" class="primary-button compact" type="button">Could be an email</button>
+                <button id="acceptButton" class="ghost-button" type="button">Accept peacefully</button>
+              </div>
+            </div>
+
+            <div class="end-screen" id="endScreen" hidden>
+              <div class="end-card">
+                <span class="end-badge" id="endBadge" aria-hidden="true">✦</span>
+                <p class="start-kicker">BREAK COMPLETE</p>
+                <h2 id="endTitle">Desk Zen</h2>
+                <p id="endCopy">You made a little room between yourself and the next deadline.</p>
+                <div class="final-score">
+                  <span>COZY POINTS</span>
+                  <strong id="finalScore">0</strong>
+                </div>
+                <p class="new-best" id="newBest" hidden>New personal best ✦</p>
+                <button class="primary-button" id="replayButton" type="button">Take another break</button>
+              </div>
+            </div>
+
+            <div class="float-layer" id="floatLayer" aria-hidden="true"></div>
+          </div>
+
+          <div class="action-tray" aria-label="Quick actions">
+            <button type="button" data-action="coffee" disabled>
+              <span aria-hidden="true">☕</span>
+              <span>Coffee</span>
+            </button>
+            <button type="button" data-action="plant" disabled>
+              <span aria-hidden="true">♧</span>
+              <span>Plant</span>
+            </button>
+            <button type="button" data-action="cat" disabled>
+              <span aria-hidden="true">🐈</span>
+              <span>Cat</span>
+            </button>
+            <button type="button" data-action="papers" disabled>
+              <span aria-hidden="true">▤</span>
+              <span>Papers</span>
+            </button>
+            <button type="button" data-action="window" disabled>
+              <span aria-hidden="true">☂</span>
+              <span>Rain</span>
+            </button>
+          </div>
+
+          <div class="message-bar" aria-live="polite">
+            <span class="message-dot" aria-hidden="true"></span>
+            <p id="message">Press start when you are ready to do absolutely nothing important.</p>
+            <span class="streak" id="streak" hidden>COMBO ×1</span>
+          </div>
+        </section>
+      </main>
+
+      <footer>
+        <p>Made for the small space between “urgent” and “actually urgent.”</p>
+        <p>Best enjoyed with headphones and zero open spreadsheets.</p>
+      </footer>
+    </div>
+
+    <script src="game.js"></script>
+  </body>
+</html>
