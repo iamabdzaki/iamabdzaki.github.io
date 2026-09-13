@@ -324,16 +324,17 @@ kbd {
 .foreground-lane {
   position: absolute;
   z-index: 3;
-  inset: 0;
+  inset: 0 0 auto;
+  height: 71.5%;
   overflow: hidden;
   pointer-events: none;
 }
 
 .visitor {
   position: absolute;
-  right: -38%;
-  bottom: -5%;
-  width: 31%;
+  right: -34%;
+  bottom: 0;
+  width: 28%;
   min-width: 112px;
   filter: drop-shadow(10px 12px 5px rgba(4, 7, 12, 0.56));
   opacity: 0;
@@ -353,22 +354,22 @@ kbd {
 }
 
 .visitor.is-boss {
-  width: 31%;
+  width: 28%;
 }
 
 .visitor.is-coworker {
-  width: 29%;
+  width: 27%;
 }
 
 .visitor.is-janitor {
-  width: 37%;
-  bottom: -7%;
+  width: 30%;
+  bottom: 0;
 }
 
 .visitor-tag {
   position: absolute;
   z-index: 2;
-  top: -8px;
+  top: 2%;
   left: 50%;
   padding: 4px 6px;
   color: #fff4da;
@@ -404,7 +405,7 @@ kbd {
   }
   100% {
     opacity: 1;
-    transform: translateX(-430%);
+    transform: translateX(-500%);
   }
 }
 
