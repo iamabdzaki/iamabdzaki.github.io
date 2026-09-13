@@ -1,7 +1,13 @@
 (() => {
   "use strict";
 
-  const GAME_DURATION = 75;
+  const query = new URLSearchParams(window.location.search);
+  const DEMO_MODE = query.has("demo");
+  const requestedVisitor = query.get("visitor");
+  const FORCED_VISITOR = ["boss", "coworker", "janitor"].includes(requestedVisitor)
+    ? requestedVisitor
+    : null;
+  const GAME_DURATION = DEMO_MODE ? 18 : 75;
   const OFFICE_START = 16 * 60 * 60 + 57 * 60 + 30;
   const OFFICE_SPAN = 150;
   const STORAGE = {
@@ -297,9 +303,19 @@
     if (!state.running || state.visitor) return;
 
     state.eventCount += 1;
-    const type = state.eventCount === 1 || Math.random() < 0.68 ? "boss" : "coworker";
+    const roll = Math.random();
+    const type =
+      state.eventCount === 1 && FORCED_VISITOR
+        ? FORCED_VISITOR
+        : state.eventCount === 1
+          ? "boss"
+          : roll < 0.56
+            ? "boss"
+            : roll < 0.8
+              ? "coworker"
+              : "janitor";
     const progress = state.elapsed / GAME_DURATION;
-    const duration = randomBetween(4.1, 4.9) - progress * 0.85;
+    const duration = randomBetween(4.8, 5.7) - progress * 0.8;
 
     state.visitor = {
       type,
@@ -311,16 +327,22 @@
     };
 
     ui.visitor.className = `visitor is-${type}`;
-    ui.visitorImage.src = type === "boss" ? "assets/boss.webp" : "assets/coworker.webp";
-    ui.visitorTag.textContent = type === "boss" ? "BOSS" : "COWORKER";
+    ui.visitorImage.src = `assets/${type}.webp`;
+    ui.visitorTag.textContent = type === "boss" ? "BOSS" : type === "coworker" ? "COWORKER" : "JANITOR";
     ui.visitor.style.setProperty("--visitor-duration", `${duration}s`);
     void ui.visitor.offsetWidth;
     ui.visitor.classList.add("is-crossing");
 
-    ui.approachText.textContent = "FOOTSTEPS · RIGHT SIDE";
+    ui.approachText.textContent = type === "janitor" ? "SQUEAK... RATTLE..." : "FOOTSTEPS · VERY CLOSE";
     ui.approachCue.classList.add("is-visible");
-    setMessage("Footsteps from the right. Friend, foe, or someone with a calendar invite?", "danger");
-    audioSystem.footstep();
+    setMessage(
+      type === "janitor"
+        ? "Something is rolling past the desk. Boss, or cleaning cart?"
+        : "Someone is walking straight past your desk. Stay ready.",
+      "danger",
+    );
+    if (type === "janitor") audioSystem.cartSound();
+    else audioSystem.footstep();
   }
 
   function updateVisitor() {
@@ -331,7 +353,8 @@
     const footstep = Math.floor(ratio * 5);
     if (footstep > event.footstep && footstep < 5) {
       event.footstep = footstep;
-      audioSystem.footstep();
+      if (event.type === "janitor") audioSystem.cartSound();
+      else audioSystem.footstep();
     }
 
     if (ratio >= 0.34 && !event.warned) {
@@ -343,13 +366,20 @@
             ? "False alarm — just a coworker getting coffee. Your sacrifice was noted."
             : "Just a coworker. Continue your extremely important break.",
         );
+      } else if (event.type === "janitor") {
+        ui.approachText.textContent = "CLEANING CART";
+        setMessage(
+          state.mode === "work"
+            ? "False alarm — the janitor and his squeaky cart got you."
+            : "Just the janitor. He saw nothing and definitely knows everything.",
+        );
       } else {
         ui.approachText.textContent = "BOSS APPROACHING";
-        setMessage("Boss in the corridor. Get that spreadsheet open!", "danger");
+        setMessage("Boss is passing right in front of the desk. Spreadsheet. Now!", "danger");
       }
     }
 
-    const inSight = ratio >= 0.57 && ratio <= 0.92;
+    const inSight = ratio >= 0.52 && ratio <= 0.88;
     ui.coverButton.classList.toggle(
       "is-alert",
       event.type === "boss" && inSight && state.mode === "break",
@@ -389,6 +419,9 @@
       audioSystem.safeSound();
     } else if (event.type === "coworker") {
       setMessage("Coast clear. The coffee run continues.");
+    } else if (event.type === "janitor") {
+      state.score += 3;
+      setMessage("Desk cleaned. Browser history diplomatically ignored. +3 points.");
     }
 
     ui.visitor.classList.remove("is-crossing");
@@ -515,7 +548,7 @@
     state.napSleeping = false;
     state.popupOpen = false;
     state.nextPopupAt = randomBetween(9, 13);
-    state.nextEventAt = randomBetween(5.2, 6.5);
+    state.nextEventAt = DEMO_MODE ? 0.04 : randomBetween(5.2, 6.5);
     state.visitor = null;
     state.eventCount = 0;
   }
@@ -734,6 +767,11 @@
         const time = context.currentTime;
         kick(time);
         tone(72, 0.09, 0.025, "triangle", 0.03);
+      },
+      cartSound() {
+        tone(96, 0.16, 0.022, "triangle");
+        tone(1040, 0.07, 0.016, "sine", 0.035);
+        tone(820, 0.09, 0.014, "sine", 0.1);
       },
       popupSound() {
         tone(880, 0.08, 0.028, "square");
