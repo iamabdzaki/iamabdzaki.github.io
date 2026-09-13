@@ -10,6 +10,8 @@
   const GAME_DURATION = DEMO_MODE ? 18 : 75;
   const OFFICE_START = 16 * 60 * 60 + 57 * 60 + 30;
   const OFFICE_SPAN = 150;
+  const BOSS_PENALTY_OFFICE_SECONDS = 120;
+  const BOSS_PENALTY_DURATION = BOSS_PENALTY_OFFICE_SECONDS / (OFFICE_SPAN / GAME_DURATION);
   const STORAGE = {
     best: "pretendToWorkBest",
     audio: "pretendToWorkAudio",
@@ -41,6 +43,7 @@
     soundToggle: document.querySelector("#soundToggle"),
     soundLabel: document.querySelector("#soundLabel"),
     officeClock: document.querySelector("#officeClock"),
+    clockPenalty: document.querySelector("#clockPenalty"),
     score: document.querySelector("#score"),
     suspicionValue: document.querySelector("#suspicionValue"),
     suspicionMeter: document.querySelector("#suspicionMeter"),
@@ -63,11 +66,15 @@
     closePopup: document.querySelector("#closePopup"),
     spreadsheet: document.querySelector("#spreadsheet"),
     screenFlash: document.querySelector("#screenFlash"),
+    clockoutAnimation: document.querySelector("#clockoutAnimation"),
+    clockoutTime: document.querySelector("#clockoutTime"),
     endScreen: document.querySelector("#endScreen"),
+    endKicker: document.querySelector("#endKicker"),
     endingTitle: document.querySelector("#endingTitle"),
     endingCopy: document.querySelector("#endingCopy"),
     finalScore: document.querySelector("#finalScore"),
     caughtCount: document.querySelector("#caughtCount"),
+    overtimeResult: document.querySelector("#overtimeResult"),
     restartButton: document.querySelector("#restartButton"),
     activityButtons: [...document.querySelectorAll(".activity-button")],
     coverButton: document.querySelector("#coverButton"),
@@ -87,12 +94,15 @@
   let audioEnabled = localStorage.getItem(STORAGE.audio) !== "off";
   let animationFrame = 0;
   let flashTimer = 0;
+  let penaltyTimer = 0;
+  let endSequenceTimer = 0;
 
   const state = {
     running: false,
     mode: "break",
     activity: "cat",
     elapsed: 0,
+    shiftDuration: GAME_DURATION,
     lastFrame: 0,
     score: 0,
     suspicion: 6,
@@ -104,6 +114,7 @@
     nextEventAt: 5.5,
     visitor: null,
     eventCount: 0,
+    overtimeAnnounced: false,
   };
 
   const randomBetween = (min, max) => min + Math.random() * (max - min);
@@ -120,7 +131,7 @@
   }
 
   function formatOfficeTime(elapsed) {
-    const total = OFFICE_START + Math.min(OFFICE_SPAN, (elapsed / GAME_DURATION) * OFFICE_SPAN);
+    const total = OFFICE_START + (elapsed / GAME_DURATION) * OFFICE_SPAN;
     const hours24 = Math.floor(total / 3600) % 24;
     const minutes = Math.floor((total % 3600) / 60);
     const seconds = Math.floor(total % 60);
@@ -129,13 +140,31 @@
     return `${String(hours12).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")} ${suffix}`;
   }
 
+  function formatClockOutTime(elapsed) {
+    return formatOfficeTime(elapsed).replace(/^0/, "").replace(/:\d{2} ([AP]M)$/, " $1");
+  }
+
+  function showClockPenalty() {
+    window.clearTimeout(penaltyTimer);
+    ui.clockPenalty.hidden = false;
+    ui.clockPenalty.classList.remove("is-visible");
+    void ui.clockPenalty.offsetWidth;
+    ui.clockPenalty.classList.add("is-visible");
+    penaltyTimer = window.setTimeout(() => {
+      ui.clockPenalty.classList.remove("is-visible");
+      ui.clockPenalty.hidden = true;
+    }, 1900);
+  }
+
   function updateStats() {
     const roundedSuspicion = Math.round(state.suspicion);
     ui.officeClock.textContent = formatOfficeTime(state.elapsed);
     ui.score.textContent = Math.max(0, Math.floor(state.score)).toLocaleString("en-US");
     ui.suspicionValue.textContent = `${roundedSuspicion}%`;
     ui.suspicionMeter.style.width = `${roundedSuspicion}%`;
-    ui.extraTasks.textContent = String(state.extraTasks);
+    ui.extraTasks.textContent = state.extraTasks
+      ? `${state.extraTasks} · +${state.extraTasks * 2}m`
+      : "0";
 
     if (roundedSuspicion >= 70) {
       ui.suspicionMeter.style.background =
@@ -314,7 +343,7 @@
             : roll < 0.8
               ? "coworker"
               : "janitor";
-    const progress = state.elapsed / GAME_DURATION;
+    const progress = state.elapsed / state.shiftDuration;
     const duration = randomBetween(4.8, 5.7) - progress * 0.8;
 
     state.visitor = {
@@ -396,11 +425,16 @@
   function catchPlayer() {
     state.caught += 1;
     state.extraTasks += 1;
+    state.shiftDuration += BOSS_PENALTY_DURATION;
     state.suspicion = clamp(state.suspicion + 28, 0, 100);
     state.score = Math.max(0, state.score - 15);
     setMode("work", false);
     flash("caught");
-    setMessage("CAUGHT. You just earned one urgent ‘quick task.’", "danger");
+    showClockPenalty();
+    setMessage(
+      `CAUGHT. Boss added 2 minutes. New clock-out: ${formatClockOutTime(state.shiftDuration)}.`,
+      "danger",
+    );
     ui.modeChip.textContent = "BUSTED";
     ui.modeChip.classList.add("is-danger");
     audioSystem.caughtSound();
@@ -428,7 +462,7 @@
     ui.approachCue.classList.remove("is-visible");
     ui.coverButton.classList.remove("is-alert");
     state.visitor = null;
-    const lateGame = state.elapsed > GAME_DURATION * 0.7;
+    const lateGame = state.elapsed > state.shiftDuration * 0.7;
     state.nextEventAt = state.elapsed + randomBetween(lateGame ? 4.8 : 6.2, lateGame ? 7.3 : 9.2);
   }
 
@@ -446,22 +480,23 @@
   }
 
   function chooseEnding() {
+    const overtimeMinutes = state.extraTasks * 2;
     if (state.caught >= 3 || state.suspicion >= 95) {
       return {
         title: "Overtime.",
-        copy: "The lights are still cozy. Your calendar is not.",
+        copy: `${overtimeMinutes} extra minutes. The lights are still cozy. Your calendar is not.`,
       };
     }
     if (state.caught === 2) {
       return {
         title: "One Quick Meeting Before You Go",
-        copy: "A phrase no employee has ever trusted.",
+        copy: `You escaped ${overtimeMinutes} minutes late. A phrase no employee has ever trusted.`,
       };
     }
     if (state.caught === 1) {
       return {
         title: "Looks Busy Enough",
-        copy: "One close call, one extra task, zero lessons learned.",
+        copy: "One close call, two extra minutes, zero lessons learned.",
       };
     }
     if (state.score >= 360) {
@@ -480,8 +515,9 @@
     if (!state.running) return;
     state.running = false;
     window.cancelAnimationFrame(animationFrame);
-    state.elapsed = GAME_DURATION;
-    ui.officeClock.textContent = "05:00:00 PM";
+    state.elapsed = state.shiftDuration;
+    const finalClockOut = formatClockOutTime(state.shiftDuration);
+    ui.officeClock.textContent = formatOfficeTime(state.shiftDuration);
     ui.visitor.classList.remove("is-crossing");
     ui.approachCue.classList.remove("is-visible");
     ui.coverButton.classList.remove("is-alert");
@@ -495,11 +531,15 @@
     ui.endingCopy.textContent = ending.copy;
     ui.finalScore.textContent = final.toLocaleString("en-US");
     ui.caughtCount.textContent = `${state.caught}×`;
+    ui.overtimeResult.textContent = `+${state.extraTasks * 2}m`;
+    ui.endKicker.textContent = `${finalClockOut} · SHIFT SURVIVED`;
+    ui.clockoutTime.textContent = finalClockOut;
     ui.desktop.hidden = true;
-    ui.endScreen.hidden = false;
-    ui.modeChip.textContent = "CLOCKED OUT";
+    ui.endScreen.hidden = true;
+    ui.clockoutAnimation.hidden = false;
+    ui.modeChip.textContent = "CLOCKING OUT";
     ui.modeChip.className = "mode-chip";
-    setMessage("Five o’clock. Close the laptop before somebody says ‘real quick.’");
+    setMessage(`Shift complete at ${finalClockOut}. Grab the bag before somebody says ‘real quick.’`);
 
     if (final > bestScore) {
       bestScore = final;
@@ -507,6 +547,16 @@
       ui.bestScore.textContent = bestScore.toLocaleString("en-US");
     }
     audioSystem.endSound();
+
+    window.clearTimeout(endSequenceTimer);
+    endSequenceTimer = window.setTimeout(() => {
+      ui.clockoutAnimation.hidden = true;
+      ui.endScreen.hidden = false;
+      ui.endScreen.classList.remove("is-revealed");
+      void ui.endScreen.offsetWidth;
+      ui.endScreen.classList.add("is-revealed");
+      ui.modeChip.textContent = "CLOCKED OUT";
+    }, window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 80 : 2500);
   }
 
   function gameLoop(timestamp) {
@@ -528,7 +578,22 @@
     updatePopup();
     updateStats();
 
-    if (state.elapsed >= GAME_DURATION) {
+    if (
+      state.extraTasks > 0 &&
+      !state.overtimeAnnounced &&
+      state.elapsed >= GAME_DURATION &&
+      state.elapsed < state.shiftDuration
+    ) {
+      state.overtimeAnnounced = true;
+      setMessage(
+        `It is 5:00 PM. The boss says no — ${state.extraTasks * 2} overtime minute${state.extraTasks === 1 ? "" : "s"} left.`,
+        "danger",
+      );
+      ui.modeChip.textContent = "OVERTIME";
+      ui.modeChip.classList.add("is-danger");
+    }
+
+    if (state.elapsed >= state.shiftDuration) {
       endGame();
       return;
     }
@@ -540,6 +605,7 @@
     state.mode = "break";
     state.activity = "cat";
     state.elapsed = 0;
+    state.shiftDuration = GAME_DURATION;
     state.lastFrame = performance.now();
     state.score = 0;
     state.suspicion = 6;
@@ -551,13 +617,20 @@
     state.nextEventAt = DEMO_MODE ? 0.04 : randomBetween(5.2, 6.5);
     state.visitor = null;
     state.eventCount = 0;
+    state.overtimeAnnounced = false;
   }
 
   function startGame() {
     window.cancelAnimationFrame(animationFrame);
+    window.clearTimeout(endSequenceTimer);
+    window.clearTimeout(penaltyTimer);
     resetState();
     ui.startScreen.hidden = true;
     ui.endScreen.hidden = true;
+    ui.endScreen.classList.remove("is-revealed");
+    ui.clockoutAnimation.hidden = true;
+    ui.clockPenalty.hidden = true;
+    ui.clockPenalty.classList.remove("is-visible");
     ui.desktop.hidden = false;
     ui.visitor.className = "visitor";
     ui.approachCue.classList.remove("is-visible");

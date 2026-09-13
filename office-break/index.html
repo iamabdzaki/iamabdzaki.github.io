@@ -17,7 +17,7 @@
     <link rel="preload" as="image" href="assets/boss.webp" />
     <link rel="preload" as="image" href="assets/coworker.webp" />
     <link rel="preload" as="image" href="assets/janitor.webp" />
-    <link rel="stylesheet" href="styles.css?v=20260913c" />
+    <link rel="stylesheet" href="styles.css?v=20260913d" />
   </head>
   <body>
     <div class="app-shell">
@@ -49,7 +49,10 @@
           <div class="status-bar">
             <div class="stat clock-stat">
               <span class="stat-label">OFFICE CLOCK</span>
-              <strong id="officeClock">04:57:30 PM</strong>
+              <div class="clock-value-row">
+                <strong id="officeClock">04:57:30 PM</strong>
+                <span class="clock-penalty" id="clockPenalty" hidden>+2:00</span>
+              </div>
             </div>
 
             <div class="stat points-stat">
@@ -85,6 +88,10 @@
                   <img id="visitorImage" src="assets/boss.webp" alt="" />
                 </div>
               </div>
+              <img class="office-occluder occluder-desk" src="assets/pretend-office.webp" alt="" />
+              <img class="office-occluder occluder-left" src="assets/pretend-office.webp" alt="" />
+              <img class="office-occluder occluder-right-plant" src="assets/pretend-office.webp" alt="" />
+              <img class="office-occluder occluder-right-shelf" src="assets/pretend-office.webp" alt="" />
               <div class="approach-cue" id="approachCue">
                 <span class="cue-pulse"></span>
                 <span id="approachText">FOOTSTEPS</span>
@@ -177,13 +184,32 @@
                 <div class="screen-flash" id="screenFlash" aria-hidden="true"></div>
               </div>
 
+              <div class="clockout-animation" id="clockoutAnimation" hidden aria-hidden="true">
+                <div class="clockout-grid"></div>
+                <div class="exit-door"><span>EXIT</span></div>
+                <div class="leaving-worker">
+                  <i class="worker-head"></i>
+                  <i class="worker-body"></i>
+                  <i class="worker-arm"></i>
+                  <i class="worker-leg leg-one"></i>
+                  <i class="worker-leg leg-two"></i>
+                  <i class="worker-case"></i>
+                </div>
+                <div class="clockout-copy">
+                  <span>ACCESS GRANTED</span>
+                  <strong id="clockoutTime">5:00 PM</strong>
+                  <small>ESCAPING OFFICE...</small>
+                </div>
+              </div>
+
               <div class="end-screen screen-panel" id="endScreen" hidden>
-                <p class="monitor-kicker">5:00 PM · SHIFT SURVIVED</p>
+                <p class="monitor-kicker" id="endKicker">5:00 PM · SHIFT SURVIVED</p>
                 <h2 id="endingTitle">Corporate Ninja</h2>
                 <p id="endingCopy">Nobody saw a thing. Probably.</p>
                 <div class="result-grid">
                   <span>Relax points <b id="finalScore">0</b></span>
                   <span>Caught <b id="caughtCount">0×</b></span>
+                  <span>Overtime <b id="overtimeResult">+0m</b></span>
                 </div>
                 <button class="start-button" id="restartButton" type="button">PLAY AGAIN</button>
               </div>
@@ -224,6 +250,6 @@
     </div>
 
     <noscript>This tiny corporate crisis requires JavaScript.</noscript>
-    <script src="game.js?v=20260913"></script>
+    <script src="game.js?v=20260913b"></script>
   </body>
 </html>
