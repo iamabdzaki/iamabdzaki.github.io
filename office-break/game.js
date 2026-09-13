@@ -561,7 +561,7 @@
 
   function gameLoop(timestamp) {
     if (!state.running) return;
-    const delta = Math.min(0.05, (timestamp - state.lastFrame) / 1000 || 0);
+    const delta = Math.min(DEMO_MODE ? 1 : 0.05, (timestamp - state.lastFrame) / 1000 || 0);
     state.lastFrame = timestamp;
     state.elapsed += delta;
 
