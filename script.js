@@ -190,3 +190,44 @@ if ("IntersectionObserver" in window) {
 }
 
 qs("#year").textContent = String(new Date().getFullYear());
+
+const certificateModal = qs("#certificate-modal");
+const certificateFrame = qs("#certificate-frame");
+const certificateTitle = qs("#certificate-title");
+const certificateOpen = qs("#certificate-open");
+let lastCredentialTrigger = null;
+
+function openCertificate(button) {
+  if (!certificateModal || !certificateFrame || !certificateTitle || !certificateOpen) return;
+  lastCredentialTrigger = button;
+  certificateTitle.textContent = button.dataset.certTitle || "Certificate";
+  certificateFrame.src = button.dataset.certUrl || "";
+  certificateOpen.href = button.dataset.certOpen || button.dataset.certUrl || "#";
+  certificateModal.classList.add("is-open");
+  certificateModal.setAttribute("aria-hidden", "false");
+  document.body.classList.add("modal-open");
+  qs(".certificate-close", certificateModal)?.focus();
+}
+
+function closeCertificate() {
+  if (!certificateModal) return;
+  certificateModal.classList.remove("is-open");
+  certificateModal.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("modal-open");
+  if (certificateFrame) certificateFrame.src = "";
+  if (lastCredentialTrigger) lastCredentialTrigger.focus();
+}
+
+qsa("button.credential-item[data-cert-url]").forEach((button) => {
+  button.addEventListener("click", () => openCertificate(button));
+});
+
+qsa("[data-cert-close]").forEach((element) => {
+  element.addEventListener("click", closeCertificate);
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && certificateModal?.classList.contains("is-open")) {
+    closeCertificate();
+  }
+});
