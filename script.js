@@ -1,81 +1,88 @@
 const cases = {
+  reconciliation: {
+    tag: "Reconciliation & controls",
+    sector: "Multinational retail",
+    title: "Reconciling VAT against hundreds of billions of IDR in monthly sales",
+    summary: "A high-volume retail environment requires accounting and tax data to remain aligned across trade sales, other income, property rental, and supporting transaction records.",
+    outcome: "High-volume monthly close support",
+    outcomeNote: "Reconciliation and financial adjustment work feeds month-end accuracy and group reporting.",
+    role: "Reconcile VAT to sales data, investigate differences, and input, reconcile, and post financial adjustments through SAP and GMD.",
+    method: ["Match accounting and transaction data", "Investigate exceptions and supporting records", "Post validated adjustments for close"]
+  },
+  controls: {
+    tag: "Invoice & payment controls",
+    sector: "Multinational retail",
+    title: "Acting as the final control point before daily invoice payments",
+    summary: "Before disbursement, invoices need consistent review of tax treatment, supporting documentation, and accounting alignment so exceptions are resolved before cash leaves the business.",
+    outcome: "Pre-disbursement control",
+    outcomeNote: "Daily invoice approvals combine document review, tax validation, and discrepancy resolution.",
+    role: "Review invoice packages before payment approval, validate tax treatment and source documents, and resolve issues with the relevant teams.",
+    method: ["Review invoice and supporting documents", "Validate treatment and accounting logic", "Resolve discrepancies before approval"]
+  },
+  systems: {
+    tag: "ERP & process improvement",
+    sector: "Retail & automotive",
+    title: "Improving finance workflows across SAP, GMD, and Odoo",
+    summary: "Reliable reporting depends on well-designed transaction logic. Across roles, system and process work has included financial adjustments, transaction mapping, Odoo tax logic, and cross-functional workflow redesign.",
+    outcome: "Stronger data flow",
+    outcomeNote: "System logic and process improvements reduced manual friction and improved control over transaction data.",
+    role: "Translate accounting and tax requirements into practical system logic, transaction mappings, and review workflows.",
+    method: ["Map current transaction flow", "Define logic and control requirements", "Test outputs and embed the improved workflow"]
+  },
   audit: {
-    tag: "Audit & dispute",
-    sector: "Publicly listed automotive group",
-    title: "Reducing an assessed tax audit penalty by 75%",
-    summary: "A high-value assessment required a response that connected accounting records, tax positions, and supporting evidence into one consistent defense.",
-    outcome: "IDR 20B → IDR 5B",
-    outcomeNote: "Assessed penalty reduced through structured evidence and dispute management.",
-    role: "Led the reconciliation, evidence mapping, response preparation, and dispute-management process.",
-    method: ["Isolate each disputed adjustment", "Trace evidence to source records", "Build a consistent defense narrative"]
-  },
-  planning: {
-    tag: "Tax planning & controls",
-    sector: "Publicly listed automotive group",
-    title: "Halving annual corporate tax liability through compliant planning",
-    summary: "The opportunity was not a single calculation. It required stronger reconciliation logic, eligible tax-credit capture, and documentation that held together across two entities.",
-    outcome: "IDR 50B → IDR 25B",
-    outcomeNote: "Annual corporate tax liability reduced by 50% through compliant planning improvements.",
-    role: "Supervised the tax team, reviewed the underlying transactions, and strengthened VAT-to-sales reconciliation controls.",
-    method: ["Map liability drivers", "Validate treatment and supporting files", "Embed controls into the monthly process"]
-  },
-  automation: {
-    tag: "Automation & data",
-    sector: "Automotive tax operations",
-    title: "Turning thousands of tax documents into a usable workflow",
-    summary: "A repetitive, document-heavy process was slowing reconciliation and review. The solution converted PDF-based records into structured Excel data for faster control and follow-up.",
-    outcome: "3,000+ documents",
-    outcomeNote: "A repeatable PDF-to-Excel workflow improved processing efficiency by approximately 50%.",
-    role: "Designed the workflow around the tax team’s review needs and used reconciliation formulas to make exceptions visible.",
-    method: ["Standardize source documents", "Extract and structure key fields", "Reconcile exceptions before reporting"]
-  },
-  coretax: {
-    tag: "Transformation & readiness",
-    sector: "National retail operation",
-    title: "Leading a company-wide Coretax transition",
-    summary: "A regulatory system change affected VAT tariff logic and invoice-data requirements across teams. Readiness depended on translating tax rules into operational data requirements.",
-    outcome: "Company-wide rollout",
-    outcomeNote: "VAT tariff logic and tax-invoice data requirements were redesigned for the transition.",
-    role: "Led the tax workstream, defined required data changes, and coordinated the translation of tax requirements into process updates.",
-    method: ["Identify rule and data gaps", "Redesign VAT and invoice logic", "Align stakeholders on the new workflow"]
+    tag: "Audit & documentation",
+    sector: "Public company & consulting",
+    title: "Building reconciliations and evidence packages that stand up to review",
+    summary: "Audit support requires more than collecting files. Accounting records, tax positions, formal responses, and source evidence must connect into one coherent and traceable package.",
+    outcome: "75% penalty reduction",
+    outcomeNote: "Structured evidence and reconciliations contributed to a major reduction in assessed penalties.",
+    role: "Prepare reconciliations, reports, formal responses, and indexed supporting evidence for financial audits, tax audits, objections, and appeals.",
+    method: ["Reconcile balances and disputed items", "Map evidence to source records", "Prepare a clear review-ready package"]
   }
 };
 
 const expertise = {
-  international: {
-    icon: "↗",
-    label: "Cross-border obligations",
-    title: "International tax",
-    copy: "Practical management of cross-border withholding tax, PPh 26, Double Tax Agreement application, offshore VAT, and Indonesian CIT and VAT implications.",
-    chips: ["PPh 26", "DTA", "Offshore VAT", "CIT", "Cross-border documentation"]
-  },
-  transfer: {
+  accounting: {
     icon: "◎",
-    label: "Intercompany readiness",
-    title: "Transfer pricing",
-    copy: "Preparation and coordination of Country-by-Country Reporting, Debt-to-Equity Ratio schedules, intercompany schedules, nominative lists, and supporting multinational documentation.",
-    chips: ["CbCR", "DER", "Intercompany schedules", "Nominative lists", "Supporting documentation"]
+    label: "Month-end and ledger support",
+    title: "Accounting operations",
+    copy: "Hands-on support for general ledger and tax adjustments, accrual-related work, month-end close, financial adjustments, cost documentation, and financial statement audit support.",
+    chips: ["General ledger", "Adjustments", "Month-end support", "Accruals", "Audit support"]
   },
-  dispute: {
-    icon: "◇",
-    label: "Defensible positions",
-    title: "Audit & dispute",
-    copy: "Experience across audit defense, objections, appeals, formal responses, evidence files, written submissions, and tax court preparation in both consulting and in-house roles.",
-    chips: ["Tax audit", "Objection", "Appeal", "Evidence index", "Tax court support"]
+  reconciliation: {
+    icon: "↔",
+    label: "High-volume data review",
+    title: "Reconciliations",
+    copy: "Experience reconciling VAT to sales, withholding-tax transactions, accounting records, and supporting documents, with a focus on identifying exceptions and maintaining data integrity.",
+    chips: ["VAT to sales", "WHT", "Account review", "Exception analysis", "Supporting documents"]
   },
-  compliance: {
+  controls: {
     icon: "✓",
-    label: "End-to-end delivery",
-    title: "Tax compliance",
-    copy: "Management and supervision of VAT, PPh Articles 21, 23, 4(2), and 26, annual CIT returns, offshore VAT, reconciliations, filings, and deadline controls across multiple entities.",
-    chips: ["VAT", "PPh 21", "PPh 23", "PPh 4(2)", "PPh 26", "Annual CIT"]
+    label: "Transaction assurance",
+    title: "Invoice & payment controls",
+    copy: "Final-control review of invoice payments before disbursement, including tax validation, supporting-document checks, accounting treatment review, and discrepancy resolution.",
+    chips: ["Invoice review", "Payment controls", "Tax validation", "Document checks", "Discrepancy resolution"]
   },
   systems: {
     icon: "⌁",
-    label: "Reliable tax data",
-    title: "Systems & controls",
-    copy: "Hands-on work with SAP, GMD, Odoo, Coretax, QuickBooks Online, Xero, and advanced Excel to connect accounting data with tax reporting, controls, and decision-ready analysis.",
-    chips: ["SAP", "GMD", "Odoo", "Coretax", "QuickBooks", "Xero", "Advanced Excel"]
+    label: "Reliable process design",
+    title: "Systems & automation",
+    copy: "Hands-on use of SAP, GMD, Odoo, QuickBooks Online, Xero, and Excel for financial adjustments, transaction mapping, workflow automation, reconciliation, and control improvement.",
+    chips: ["SAP", "GMD", "Odoo", "QuickBooks Online", "Xero", "Excel"]
+  },
+  audit: {
+    icon: "◇",
+    label: "Review-ready work",
+    title: "Audit & documentation",
+    copy: "Preparation of financial-statement audit support, tax-audit schedules, reconciliations, formal reports, response letters, evidence packages, and due-diligence documentation.",
+    chips: ["Financial audit", "Tax audit", "Due diligence", "Formal reports", "Evidence files"]
+  },
+  tax: {
+    icon: "↗",
+    label: "Compliance depth",
+    title: "Tax & compliance",
+    copy: "Deep experience across VAT, withholding tax, annual CIT support, Coretax, CbCR, DER, intercompany schedules, and recurring compliance controls for multinational and listed-company environments.",
+    chips: ["VAT", "WHT", "CIT", "Coretax", "CbCR", "DER"]
   }
 };
 
